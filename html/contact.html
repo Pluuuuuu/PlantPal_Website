@@ -46,6 +46,9 @@
         <div class="container">
             <h2 class="section-title">Send Us a Message</h2>
             <form id="contactForm" class="form">
+                <!-- Message Display Area -->
+                <div id="formMessage" class="form-message" style="display: none;"></div>
+                
                 <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required>
@@ -58,7 +61,7 @@
                     <label for="message">Message</label>
                     <textarea id="message" name="message" rows="5" required></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Send Message</button>
+                <button type="submit" class="btn btn-primary" id="submitButton">Send Message</button>
             </form>
         </div>
     </section>
@@ -175,23 +178,53 @@
         (function() {
             'use strict';
             
+            // Function to show message in the form
+            function showMessage(message, type) {
+                const messageEl = document.getElementById('formMessage');
+                if (!messageEl) return;
+                
+                // Remove all classes
+                messageEl.className = 'form-message';
+                messageEl.classList.add(type);
+                
+                // Set message content with icon
+                let icon = '';
+                if (type === 'success') {
+                    icon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+                } else if (type === 'error') {
+                    icon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+                } else if (type === 'sending') {
+                    icon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>';
+                }
+                
+                messageEl.innerHTML = icon + '<span>' + message + '</span>';
+                messageEl.style.display = 'flex';
+                
+                // Scroll to message
+                messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            function hideMessage() {
+                const messageEl = document.getElementById('formMessage');
+                if (messageEl) {
+                    messageEl.style.display = 'none';
+                }
+            }
+            
             // Wait for DOM to be fully loaded
             document.addEventListener('DOMContentLoaded', function() {
                 const contactForm = document.getElementById('contactForm');
-                const submitButton = contactForm ? contactForm.querySelector('button[type="submit"]') : null;
+                const submitButton = document.getElementById('submitButton');
                 
                 if (!contactForm) {
                     console.error('Contact form not found');
                     return;
                 }
                 
-                // Remove any existing event listeners by cloning the form
-                const newForm = contactForm.cloneNode(true);
-                contactForm.parentNode.replaceChild(newForm, contactForm);
-                const form = document.getElementById('contactForm');
-                const btn = form.querySelector('button[type="submit"]');
+                // Hide message initially
+                hideMessage();
                 
-                form.addEventListener('submit', async function(e) {
+                contactForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
@@ -202,21 +235,27 @@
                         
                         // Validate inputs
                         if (!name || !email || !message) {
-                            alert('Please fill in all fields.');
+                            showMessage('Please fill in all fields.', 'error');
                             return;
                         }
                         
                         // Validate email format
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!emailRegex.test(email)) {
-                            alert('Please enter a valid email address.');
+                            showMessage('Please enter a valid email address.', 'error');
                             return;
                         }
                         
+                        // Hide previous messages
+                        hideMessage();
+                        
+                        // Show sending message
+                        showMessage('Sending your message...', 'sending');
+                        
                         // Disable submit button and show loading state
-                        if (btn) {
-                            btn.disabled = true;
-                            btn.textContent = 'Sending...';
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.textContent = 'Sending...';
                         }
                         
                         // Send form data to API endpoint (NOT mailto)
@@ -241,23 +280,28 @@
                         
                         if (data.success) {
                             // Show success message
-                            alert('Thank you! Your message has been sent successfully. We\'ll get back to you soon.');
+                            showMessage('✓ Message sent successfully! We\'ll get back to you soon.', 'success');
                             
                             // Reset form
-                            form.reset();
+                            contactForm.reset();
+                            
+                            // Hide message after 5 seconds
+                            setTimeout(function() {
+                                hideMessage();
+                            }, 5000);
                         } else {
                             // Show error message
-                            alert(data.error || 'Failed to send message. Please try again or email us directly at plantpal.org@gmail.com');
+                            showMessage(data.error || 'Failed to send message. Please try again or email us directly.', 'error');
                         }
                         
                     } catch (error) {
                         console.error('Error submitting form:', error);
-                        alert('An error occurred while sending your message. Please try again or email us directly at plantpal.org@gmail.com');
+                        showMessage('An error occurred while sending your message. Please try again or email us directly at plantpal.org@gmail.com', 'error');
                     } finally {
                         // Re-enable submit button
-                        if (btn) {
-                            btn.disabled = false;
-                            btn.textContent = 'Send Message';
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Send Message';
                         }
                     }
                 });
