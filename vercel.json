@@ -1,11 +1,10 @@
 {
   "version": 2,
-  "routes": [
-    { "handle": "filesystem" },
-
-    { "src": "^/$", "dest": "/html/index.html" },
-    { "src": "^/about\\.html$", "dest": "/html/about.html" },
-    { "src": "^/services\\.html$", "dest": "/html/services.html" },
-    { "src": "^/contact\\.html$", "dest": "/html/contact.html" }
+  "rewrites": [
+    { "source": "/", "destination": "/html/index.html" },
+    { "source": "/index.html", "destination": "/html/index.html" },
+    { "source": "/about.html", "destination": "/html/about.html" },
+    { "source": "/services.html", "destination": "/html/services.html" },
+    { "source": "/contact.html", "destination": "/html/contact.html" }
   ]
 }
