@@ -1,0 +1,10 @@
+{
+  "name": "plantpal-website",
+  "version": "1.0.0",
+  "description": "PlantPal website with contact form",
+  "type": "module",
+  "dependencies": {
+    "resend": "^3.2.0"
+  }
+}
+

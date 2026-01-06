@@ -173,9 +173,10 @@
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             const contactForm = document.getElementById('contactForm');
+            const submitButton = contactForm ? contactForm.querySelector('button[type="submit"]') : null;
             
             if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
+                contactForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
                     try {
@@ -189,16 +190,54 @@
                             return;
                         }
                         
-                        // Construct mailto URL with encoded parameters
-                        const subject = encodeURIComponent('Contact Form Submission from ' + name);
-                        const body = encodeURIComponent('Name: ' + name + '\n\nEmail: ' + email + '\n\nMessage:\n' + message);
-                        const mailtoLink = 'mailto:plantpal.org@gmail.com?subject=' + subject + '&body=' + body;
+                        // Validate email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email)) {
+                            alert('Please enter a valid email address.');
+                            return;
+                        }
                         
-                        // Open the email client
-                        window.location.href = mailtoLink;
+                        // Disable submit button and show loading state
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                            submitButton.textContent = 'Sending...';
+                        }
+                        
+                        // Send form data to API endpoint
+                        const response = await fetch('/api/send-email', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                message: message
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.success) {
+                            // Show success message
+                            alert('Thank you! Your message has been sent successfully. We\'ll get back to you soon.');
+                            
+                            // Reset form
+                            contactForm.reset();
+                        } else {
+                            // Show error message
+                            alert(data.error || 'Failed to send message. Please try again or email us directly at plantpal.org@gmail.com');
+                        }
+                        
                     } catch (error) {
                         console.error('Error submitting form:', error);
                         alert('An error occurred. Please try again or email us directly at plantpal.org@gmail.com');
+                    } finally {
+                        // Re-enable submit button
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Send Message';
+                        }
                     }
                 });
             }
