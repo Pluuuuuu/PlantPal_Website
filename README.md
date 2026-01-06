@@ -22,19 +22,25 @@ PlantPal is an AI-powered mobile app designed for beginner and urban gardeners w
     index.html          # Home page
     about.html          # About Us page
     services.html       # Services page
-    contact.html        # Contact Us page
+    contact.html        # Contact Us page (with form submission)
   /css
     header.css          # Shared header styles
     main.css            # Main stylesheet
+    styles.css          # Additional styles
+  /api
+    send-email.js       # Vercel serverless function for contact form
   /assets
     /images
       logopp.png        # PlantPal logo
       [other images]    # All website images
+  package.json          # Dependencies (Resend SDK)
+  vercel.json           # Vercel deployment configuration
+  EMAIL_SETUP.md        # Email service setup instructions
 ```
 
 ## 🎨 Design Features
 
-- **Pure HTML + CSS** - No JavaScript, no frameworks
+- **HTML + CSS + JavaScript** - Clean frontend with serverless backend
 - **Responsive Design** - Mobile-first approach
 - **Modern UI** - Clean, minimalist design with smooth transitions
 - **Color Palette**:
@@ -46,24 +52,52 @@ PlantPal is an AI-powered mobile app designed for beginner and urban gardeners w
 
 ## 🚀 Getting Started
 
+### Local Development
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/Pluuuuuu/PlantPal_Website.git
    cd PlantPal_Website
    ```
 
-2. Open any HTML file in your browser:
+2. Install dependencies (for email functionality):
+   ```bash
+   npm install
+   ```
+
+3. Open any HTML file in your browser:
    - Start with `html/index.html` for the home page
    - All pages are linked via navigation
 
-3. No build process required - just open and view!
+### Deployment
+
+This website is designed to be deployed on **Vercel**:
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Set up environment variables (see [EMAIL_SETUP.md](./EMAIL_SETUP.md))
+4. Deploy!
+
+The `vercel.json` file configures URL rewrites for clean paths.
 
 ## 📄 Pages
 
 - **Home** (`html/index.html`) - Hero section, value proposition, awards, feature table
 - **About Us** (`html/about.html`) - Mission, target audience, core values
 - **Services** (`html/services.html`) - All PlantPal features and how it works
-- **Contact Us** (`html/contact.html`) - Contact form and information
+- **Contact Us** (`html/contact.html`) - Contact form with API integration
+
+## 📧 Contact Form
+
+The contact form uses a serverless API endpoint (`/api/send-email`) powered by the Resend SDK to send emails securely. 
+
+**Setup Instructions**: See [EMAIL_SETUP.md](./EMAIL_SETUP.md) for detailed setup instructions.
+
+**Key Features**:
+- Client-side validation
+- Server-side email sending via Resend API
+- Success/error message handling
+- Secure API key management via environment variables
 
 ## 🏆 Awards & Recognition
 
@@ -77,12 +111,14 @@ PlantPal is an AI-powered mobile app designed for beginner and urban gardeners w
 - **LinkedIn**: [PlantPal Org](https://www.linkedin.com/in/plantpal-org/)
 - **Email**: plantpal.org@gmail.com
 
-## 📝 Notes
+## 📝 Technical Notes
 
 - All images should be placed in `/assets/images/`
 - Logo file: `logopp.png`
-- Contact form uses `mailto:` to send emails
+- Contact form uses serverless API endpoint (not `mailto:`)
 - All icons are SVG (no external dependencies)
+- Environment variable `RESEND_API_KEY` required for email functionality
+- See `EMAIL_SETUP.md` for email service configuration
 
 ## 👥 Team
 
