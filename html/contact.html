@@ -170,14 +170,30 @@
     </footer>
 
     <script>
-        // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            const contactForm = document.getElementById('contactForm');
-            const submitButton = contactForm ? contactForm.querySelector('button[type="submit"]') : null;
+        // Contact Form Handler - Updated Version
+        // This script sends form data to the API endpoint, NOT using mailto
+        (function() {
+            'use strict';
             
-            if (contactForm) {
-                contactForm.addEventListener('submit', async function(e) {
+            // Wait for DOM to be fully loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                const contactForm = document.getElementById('contactForm');
+                const submitButton = contactForm ? contactForm.querySelector('button[type="submit"]') : null;
+                
+                if (!contactForm) {
+                    console.error('Contact form not found');
+                    return;
+                }
+                
+                // Remove any existing event listeners by cloning the form
+                const newForm = contactForm.cloneNode(true);
+                contactForm.parentNode.replaceChild(newForm, contactForm);
+                const form = document.getElementById('contactForm');
+                const btn = form.querySelector('button[type="submit"]');
+                
+                form.addEventListener('submit', async function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     
                     try {
                         const name = document.getElementById('name').value.trim();
@@ -198,13 +214,14 @@
                         }
                         
                         // Disable submit button and show loading state
-                        if (submitButton) {
-                            submitButton.disabled = true;
-                            submitButton.textContent = 'Sending...';
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.textContent = 'Sending...';
                         }
                         
-                        // Send form data to API endpoint
-                        const response = await fetch('/api/send-email', {
+                        // Send form data to API endpoint (NOT mailto)
+                        const apiUrl = '/api/send-email';
+                        const response = await fetch(apiUrl, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -216,14 +233,18 @@
                             })
                         });
                         
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
                         const data = await response.json();
                         
-                        if (response.ok && data.success) {
+                        if (data.success) {
                             // Show success message
                             alert('Thank you! Your message has been sent successfully. We\'ll get back to you soon.');
                             
                             // Reset form
-                            contactForm.reset();
+                            form.reset();
                         } else {
                             // Show error message
                             alert(data.error || 'Failed to send message. Please try again or email us directly at plantpal.org@gmail.com');
@@ -231,17 +252,17 @@
                         
                     } catch (error) {
                         console.error('Error submitting form:', error);
-                        alert('An error occurred. Please try again or email us directly at plantpal.org@gmail.com');
+                        alert('An error occurred while sending your message. Please try again or email us directly at plantpal.org@gmail.com');
                     } finally {
                         // Re-enable submit button
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                            submitButton.textContent = 'Send Message';
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = 'Send Message';
                         }
                     }
                 });
-            }
-        });
+            });
+        })();
     </script>
 </body>
 </html>
